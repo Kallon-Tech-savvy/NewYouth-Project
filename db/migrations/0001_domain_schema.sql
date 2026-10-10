@@ -25,15 +25,16 @@ INSERT INTO roles (code, description) VALUES
   ('core_admin', 'Authorized core-team administrative access');
 
 CREATE TABLE profile_roles (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   profile_id uuid NOT NULL REFERENCES profiles(id) ON DELETE RESTRICT,
   role_code text NOT NULL REFERENCES roles(code) ON DELETE RESTRICT,
   granted_by_profile_id uuid REFERENCES profiles(id) ON DELETE RESTRICT,
   granted_at timestamptz NOT NULL DEFAULT now(),
   revoked_at timestamptz,
-  PRIMARY KEY (profile_id, role_code, granted_at),
   CHECK (revoked_at IS NULL OR revoked_at >= granted_at)
 );
-CREATE INDEX profile_roles_active_idx ON profile_roles(profile_id, role_code) WHERE revoked_at IS NULL;
+CREATE UNIQUE INDEX profile_roles_one_active_idx
+  ON profile_roles(profile_id, role_code) WHERE revoked_at IS NULL;
 
 CREATE TABLE locations (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
