@@ -117,6 +117,52 @@ CREATE INDEX price_reports_review_queue_idx ON price_reports(status, submitted_a
 CREATE INDEX price_reports_item_location_time_idx ON price_reports(item_id, location_id, observed_at DESC);
 CREATE INDEX price_reports_context_gin_idx ON price_reports USING gin(context);
 
+-- Publication is a separate, explicit decision; approved reports are not public by default.
+CREATE TABLE published_observations (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  report_id uuid NOT NULL REFERENCES price_reports(id) ON DELETE RESTRICT,
+  published_by_profile_id uuid NOT NULL REFERENCES profiles(id) ON DELETE RESTRICT,
+  published_at timestamptz NOT NULL DEFAULT now(),
+  unpublished_at timestamptz,
+  publication_note text,
+  CHECK (unpublished_at IS NULL OR unpublished_at >= published_at)
+);
+CREATE UNIQUE INDEX published_observations_one_current_idx
+  ON published_observations(report_id) WHERE unpublished_at IS NULL;
+CREATE INDEX published_observations_published_at_idx ON published_observations(published_at DESC);
+
+CREATE FUNCTION enforce_publish_only_approved_report() RETURNS trigger
+LANGUAGE plpgsql AS $
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM price_reports
+    WHERE id = NEW.report_id AND status = 'approved'
+  ) THEN
+    RAISE EXCEPTION 'Only approved reports may be published';
+  END IF;
+  RETURN NEW;
+END;
+$;
+CREATE TRIGGER published_observations_approved_guard
+  BEFORE INSERT OR UPDATE OF report_id ON published_observations
+  FOR EACH ROW EXECUTE FUNCTION enforce_publish_only_approved_report();
+
+CREATE FUNCTION prevent_unapproving_published_report() RETURNS trigger
+LANGUAGE plpgsql AS $
+BEGIN
+  IF NEW.status <> 'approved' AND EXISTS (
+    SELECT 1 FROM published_observations
+    WHERE report_id = OLD.id AND unpublished_at IS NULL
+  ) THEN
+    RAISE EXCEPTION 'Unpublish report before changing its status from approved';
+  END IF;
+  RETURN NEW;
+END;
+$;
+CREATE TRIGGER price_reports_published_status_guard
+  BEFORE UPDATE OF status ON price_reports
+  FOR EACH ROW EXECUTE FUNCTION prevent_unapproving_published_report();
+
 CREATE TABLE report_review_events (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   report_id uuid NOT NULL REFERENCES price_reports(id) ON DELETE RESTRICT,
@@ -201,6 +247,14 @@ CREATE TABLE estimate_runs (
   CHECK (period_end >= period_start)
 );
 CREATE INDEX estimate_runs_lookup_idx ON estimate_runs(category_code, location_id, period_end DESC, generated_at DESC);
+
+-- Every published estimate run can retain exactly which publication records supported it.
+CREATE TABLE estimate_run_observations (
+  estimate_run_id uuid NOT NULL REFERENCES estimate_runs(id) ON DELETE RESTRICT,
+  published_observation_id uuid NOT NULL REFERENCES published_observations(id) ON DELETE RESTRICT,
+  PRIMARY KEY (estimate_run_id, published_observation_id)
+);
+CREATE INDEX estimate_run_observations_source_idx ON estimate_run_observations(published_observation_id);
 
 CREATE TABLE estimate_values (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
