@@ -68,9 +68,9 @@ Current Supabase documentation lists seven-day PITR at approximately USD 100/mon
 | Pro baseline | USD 25/month before additional services and overages | Preferred production candidate for further assessment, but over the current ceiling |
 | Pro plus 7-day PITR | Approximately USD 130/month before other services, assuming USD 10 compute credit offsets Small compute | Not approved; roughly NLe 2,980/month at the provisional planning rate; only evaluate if recovery objectives justify the added cost |
 
-### Recovery objectives — proposed for decision, not yet approved
+### Recovery objectives — approved on 2026-10-10; verification remains pending
 
-For the limited pilot, adopt these as **proposed minimum targets** for owner approval before production:
+The user explicitly approved these minimum targets on 2026-10-10. Approval establishes policy targets; it does not prove implementation or successful recovery:
 
 - **RPO (maximum tolerable data loss): 24 hours** for the PostgreSQL database, conditional on daily backup completion. This is a target, not a guarantee; backup schedules and actual restore points must be verified.
 - **RTO (target to restore core service): 1 business day** after a declared recoverable outage, subject to staff availability, provider access, restore duration, and validation. This is not an SLA.
@@ -80,7 +80,7 @@ For the limited pilot, adopt these as **proposed minimum targets** for owner app
 - **Recovery ownership:** assign a named responsible role, a documented runbook, secure access to backup credentials, and an escalation/contact path before launch.
 - **Incident handling:** document how to declare recovery, preserve evidence, notify the project lead, validate recovered data, and communicate service restoration.
 
-If the project requires an RPO materially below 24 hours or an RTO below one business day, daily backups alone may not meet the requirement; evaluate PITR or another recovery design and its full cost. Do not enable paid PITR without a separate decision. These targets remain proposed until explicitly approved and demonstrated by a restore drill.
+If the project requires an RPO materially below 24 hours or an RTO below one business day, daily backups alone may not meet the requirement; evaluate PITR or another recovery design and its full cost. Do not enable paid PITR without a separate decision. These targets are approved, but remain unverified until demonstrated by a restore drill.
 
 ## 3. Security baseline
 
@@ -109,9 +109,9 @@ If the project requires an RPO materially below 24 hours or an RTO below one bus
 - Never log passwords, tokens, MFA codes, or recovery codes.
 
 ### Backup and recovery
-- Proposed pilot RPO: 24 hours; proposed pilot RTO: one business day. Neither is approved or verified yet.
+- Approved pilot RPO: 24 hours; approved pilot RTO: one business day. Neither has been verified by a restore drill yet.
 - Baseline: daily backups with seven-day retention, subject to current plan verification.
-- Proposed independent export retention: 30 days, pending privacy and storage review; cost and automation remain unverified.
+- Approved independent export retention target: 30 days. Privacy/storage implementation, cost and automation still require validation.
 - Complete and record a restore drill before production, including data, calculations, authorization, and uploaded-object recovery. Repeat quarterly and after material changes.
 - Treat database backups and Storage object recovery separately; do not assume restoring the database restores deleted uploaded objects.
 - If required objectives cannot be met, document alternatives and costs and obtain a decision rather than silently lowering requirements.
@@ -185,4 +185,4 @@ TNY-002 must not be marked complete if any of the following remains unresolved:
 
 ## 8. Current conclusion
 
-Supabase remains the priority candidate, but the Pro baseline fails the current budget ceiling on the available estimate. No budget increase, provider selection, provisioning, deployment, or application implementation is authorized by this assessment. Continue only with evidence gathering and documentation until the user makes the required separate decisions.
+Supabase remains the priority candidate, but the Pro + representative domain baseline is approximately USD 25.87/month (about NLe 592.90 using the provisional rate), above the NLe 500/month ceiling before payment fees, independent-backup operations, and usage overages. The budget gap and need for a separate budget decision are documented. The recovery targets are approved, but recovery has not been tested. TNY-002 architecture documentation may close as complete for its planning/evaluation scope; this does not approve a production provider, budget increase, provisioning, deployment, or application implementation. Production remains blocked pending verified all-in costs, local payment conversion, workload assumptions, and a successful recovery drill.
