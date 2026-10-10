@@ -17,6 +17,10 @@ BEGIN
     RAISE EXCEPTION 'Expected five seeded price categories';
   END IF;
 
+  IF (SELECT count(*) FROM locations WHERE is_pilot_location) <> 2 THEN
+    RAISE EXCEPTION 'Expected Freetown and Kenema as pilot locations';
+  END IF;
+
   INSERT INTO profiles (auth_subject, display_name)
   VALUES ('test:contributor', 'Test contributor')
   RETURNING id INTO contributor_id;
@@ -79,6 +83,11 @@ BEGIN
       RAISE;
     END IF;
   END;
+
+  UPDATE price_reports SET status = 'under_review' WHERE id = report_id;
+  INSERT INTO report_review_events (
+    report_id, actor_profile_id, from_status, to_status, reason_code
+  ) VALUES (report_id, reviewer_id, 'received', 'under_review', 'test_review_started');
 
   UPDATE price_reports SET status = 'approved' WHERE id = report_id;
   INSERT INTO report_review_events (
