@@ -1,7 +1,7 @@
 # Supabase cost and security assessment — TNY-002
 
 - **Status:** Preliminary assessment; not a final provider selection
-- **Assessment date:** 2026-10-10
+- **Assessment date:** 2026-10-10 (official Supabase pricing pages re-checked during follow-up)
 - **Related ticket:** [TNY-002 — Architecture and technical baseline](../tickets/TNY-002.md)
 - **Related ADR:** [ADR-0001 — Modular monolith and provider evaluation](../adr/0001-modular-monolith-and-provider-evaluation.md)
 - **Budget rule:** NLe 500/month remains the current ceiling. No increase is approved by this assessment.
@@ -11,9 +11,9 @@
 
 Supabase is the preferred candidate for the next evaluation step because it can combine PostgreSQL, authentication, storage, database policies, and server-side functions with relatively low integration overhead. It is **not yet the final provider selection**.
 
-The previously reviewed Supabase Pro base price of USD 25/month converts to approximately NLe 573/month using the provisional planning rate of NLe 22.9194/USD. That is approximately NLe 73 above the NLe 500 ceiling before payment conversion costs or any additional operating services.
+The official Supabase pricing page currently lists Pro at USD 25/month and states that paid plans include USD 10/month in compute credits, enough to cover one Micro instance. The published plan limits include 8 GB database disk per project, 250 GB egress, 100 GB file storage, and daily backups retained for seven days. Sources: [Supabase pricing](https://supabase.com/pricing) and [compute and disk](https://supabase.com/docs/guides/platform/compute-and-disk), checked 2026-10-10.
 
-The exchange rate is a planning assumption, not a guaranteed payment rate. Verify current plan prices, compute credit application, exchange rate, and payment fees immediately before any budget or provider decision.
+Using the existing provisional planning rate of NLe 22.9194/USD gives USD 25 ≈ NLe 572.99/month, approximately NLe 72.99 above the NLe 500 ceiling before payment conversion costs or any additional operating services. The exchange rate remains a planning assumption; an authoritative same-day rate and the actual payment provider's conversion fees have not been verified. Do not treat the local-currency conversion as a binding quote.
 
 ## 2. Cost model
 
@@ -50,7 +50,7 @@ The USD 10 compute credit must not be counted twice: under the stated assumption
 
 ### Optional recovery cost
 
-Supabase documentation has listed seven-day PITR at approximately USD 100/month and requires at least Small compute. Treat that figure as an indicative historical pricing input, not a verified quote. Verify the current PITR price, required compute cost, credit treatment, and backup interaction before proposing it. PITR is excluded from the baseline because its cost is substantial and no approved RPO/RTO currently requires it.
+Current Supabase documentation lists seven-day PITR at approximately USD 100/month and requires at least Small compute, listed at approximately USD 15/month. One Pro organization receives USD 10/month in compute credits. Assuming the credit offsets the Small compute charge, a rough one-project Pro + Small + seven-day PITR estimate is USD 25 + USD 15 + USD 100 − USD 10 = approximately USD 130/month, before other services and usage charges. At the provisional NLe 22.9194/USD planning rate, this is approximately NLe 2,980/month. Confirm current billing treatment before relying on this calculation. Sources: [PITR pricing and retention](https://supabase.com/docs/guides/platform/backups), [compute and disk](https://supabase.com/docs/guides/platform/compute-and-disk), and [billing FAQ](https://supabase.com/docs/guides/platform/billing-faq), checked 2026-10-10. PITR is excluded from the baseline because no approved RPO/RTO currently requires it.
 
 ### Scenarios
 
@@ -58,7 +58,7 @@ Supabase documentation has listed seven-day PITR at approximately USD 100/month 
 |---|---:|---|
 | Free plan | USD 0 plan fee | Development/controlled experiments only; do not describe as production-ready without explicit acceptance of limitations |
 | Pro baseline | USD 25/month before additional services and overages | Preferred production candidate for further assessment, but over the current ceiling |
-| Pro plus PITR | At least Pro plus the quoted PITR add-on and required compute adjustment | Not approved; only evaluate if recovery objectives justify the added cost |
+| Pro plus 7-day PITR | Approximately USD 130/month before other services, assuming USD 10 compute credit offsets Small compute | Not approved; roughly NLe 2,980/month at the provisional planning rate; only evaluate if recovery objectives justify the added cost |
 
 ## 3. Security baseline
 
@@ -117,13 +117,15 @@ TNY-002 must not be marked complete if any of the following remains unresolved:
 - Completed/reconciled TNY-001 repository audit.
 - A separate explicit decision if the recommended configuration exceeds NLe 500/month.
 
-## 6. Official references to re-check
+## 6. Official references checked 2026-10-10
 
-- [Supabase pricing](https://supabase.com/pricing)
-- [Supabase database backups](https://supabase.com/docs/guides/platform/backups)
-- [Supabase point-in-time recovery](https://supabase.com/docs/guides/platform/point-in-time-recovery)
-- [Supabase Auth MFA](https://supabase.com/docs/guides/auth/auth-mfa)
-- [Supabase production checklist](https://supabase.com/docs/guides/deployment/going-into-prod)
+- [Supabase pricing](https://supabase.com/pricing) — Pro base, plan limits, included compute credits.
+- [Supabase billing FAQ](https://supabase.com/docs/guides/platform/billing-faq) — compute credit and multi-project billing examples.
+- [Supabase compute and disk](https://supabase.com/docs/guides/platform/compute-and-disk) — Micro and Small compute prices.
+- [Supabase database backups](https://supabase.com/docs/guides/platform/backups) — daily backup retention, PITR prices and Small compute requirement.
+- [Supabase Auth MFA](https://supabase.com/docs/guides/auth/auth-mfa) — MFA implementation and enforcement.
+- [Supabase production checklist](https://supabase.com/docs/guides/deployment/going-into-prod) — production hardening.
+- [Bank of Sierra Leone](https://bsl.gov.sl/) — official exchange-rate portal; an unambiguous same-day USD/NLe rate and payment-route fee remain to be recorded before a binding local-currency budget.
 
 ## 7. Current conclusion
 
