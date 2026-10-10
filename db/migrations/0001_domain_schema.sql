@@ -48,6 +48,10 @@ CREATE TABLE locations (
   CHECK (parent_location_id IS NULL OR parent_location_id <> id)
 );
 
+INSERT INTO locations (code, name, location_type, is_pilot_location) VALUES
+  ('freetown', 'Freetown', 'city', true),
+  ('kenema', 'Kenema', 'city', true);
+
 CREATE TABLE price_categories (
   code text PRIMARY KEY CHECK (code IN ('food', 'transport', 'housing', 'utilities', 'cooking_fuel')),
   name text NOT NULL,
@@ -265,9 +269,12 @@ CREATE TABLE estimate_values (
   value_numeric numeric(18,4) NOT NULL,
   currency_code char(3) CHECK (currency_code IS NULL OR currency_code ~ '^[A-Z]{3}$'),
   unit_code text REFERENCES units(code) ON DELETE RESTRICT,
-  metadata jsonb NOT NULL DEFAULT '{}'::jsonb CHECK (jsonb_typeof(metadata) = 'object'),
-  UNIQUE (estimate_run_id, metric_code, item_id)
+  metadata jsonb NOT NULL DEFAULT '{}'::jsonb CHECK (jsonb_typeof(metadata) = 'object')
 );
+CREATE UNIQUE INDEX estimate_values_item_metric_unique_idx
+  ON estimate_values(estimate_run_id, metric_code, item_id) WHERE item_id IS NOT NULL;
+CREATE UNIQUE INDEX estimate_values_run_metric_unique_idx
+  ON estimate_values(estimate_run_id, metric_code) WHERE item_id IS NULL;
 CREATE INDEX estimate_values_run_idx ON estimate_values(estimate_run_id);
 
 CREATE TABLE standard_baskets (
