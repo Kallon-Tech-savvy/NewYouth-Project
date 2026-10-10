@@ -37,9 +37,9 @@ Using the existing provisional planning rate of NLe 22.9194/USD gives USD 25 ≈
 | Daily database backups, seven-day retention | Included | Included | Pro plan feature; restore test still required |
 | TOTP MFA APIs | No separate base charge identified | 0.00 assumed incremental | App flows and enforcement remain engineering work |
 | Frontend hosting | 0.00 candidate | 0.00 candidate | Cloudflare Pages Free supports static assets and custom domains; not a quote for Functions or other services |
-| Domain and DNS | TBD | TBD | Registrar and renewal terms not selected |
+| Domain renewal (.com example) | 0.87 | TBD | Cloudflare Registrar lists USD 10.46/year renewal; USD/month equivalent, local conversion/fees excluded; actual domain not selected |
 | Transactional email | 0.00 candidate | 0.00 candidate | Resend Free advertises 3,000 emails/month and 100/day; must confirm suitability, sender-domain setup, and actual authentication volume |
-| Independent database export/backup storage | TBD | TBD | Strategy and retention not selected |
+| Independent database export/backup storage | USD 0 at very small volumes, candidate only | TBD | Backblaze B2 lists first 10 GB free and USD 6/TB/month; operational export automation, retention, restore testing, and object-storage backup are separate; not selected |
 | Payment processing/currency conversion | TBD | TBD | Payment route and actual exchange rate unknown |
 | Additional database compute/disk, storage, or egress | TBD | TBD | Usage forecast and plan limits must be verified |
 | Monitoring or other paid operational services | TBD | TBD | Select only when required and costed |
@@ -52,7 +52,8 @@ The USD 10 compute credit must not be counted twice: under the stated assumption
 
 - **Static frontend:** Cloudflare Pages documents a Free plan with up to 500 builds/month, custom-domain support, and free/unlimited static asset requests. This is a candidate for a static React/Vite frontend, not a commitment to use Cloudflare and not a price for server-side Functions. Source: [Cloudflare Pages limits](https://developers.cloudflare.com/pages/platform/limits/), checked 2026-10-10.
 - **Authentication email:** Supabase states its built-in SMTP is not for production: it is limited to pre-authorized team addresses and currently 2 messages/hour, with no delivery SLA. Production email/password confirmation and password-reset flows require custom SMTP. Resend lists a Free tier of 3,000 emails/month and 100/day, so USD 0 is a candidate for a small pilot only if sender-domain verification, delivery needs, and limits are acceptable. Sources: [Supabase custom SMTP](https://supabase.com/docs/guides/auth/auth-smtp), [Supabase production checklist](https://supabase.com/docs/guides/deployment/going-into-prod), [Resend pricing](https://resend.com/pricing?product=transactional), checked 2026-10-10.
-- **Domain and DNS:** Cloudflare DNS can be a no-cost DNS candidate, but the domain registration/renewal price depends on registrar and TLD. ICANN advises checking renewal terms separately from promotional registration prices. No selected domain or registrar quote is recorded; monthly cost remains TBD. Sources: [Cloudflare plans](https://www.cloudflare.com/plans/), [ICANN renewal guidance](https://www.icann.org/resources/pages/domain-name-renewal-expiration-faqs-2018-12-07-en/), checked 2026-10-10.
+- **Domain and DNS:** Cloudflare Registrar's live price table lists `.com` registration/renewal at USD 10.46/year (about USD 0.87/month when annualized), and Cloudflare DNS is a no-cost candidate. This is only a representative `.com` price, not a selected or availability-checked domain; payment conversion and provider fees remain unverified. ICANN advises checking renewal terms separately from promotional registration prices. Sources: [Cloudflare Registrar domain prices](https://pricing.registrar.cloudflare.com/), [Cloudflare Registrar renewal policy](https://developers.cloudflare.com/registrar/account-options/renew-domains/), [ICANN renewal guidance](https://www.icann.org/resources/pages/domain-name-renewal-expiration-faqs-2018-12-07-en/), checked 2026-10-10.
+- **Independent backup storage:** Backblaze B2 lists the first 10 GB free and USD 6/TB/month for pay-as-you-go storage, with monthly egress free up to 3× average stored data. These prices do not include implementation/operation of exports, restore drills, or protection of uploaded objects; B2 is a candidate only, not selected. Source: [Backblaze B2 pricing](https://www.backblaze.com/cloud-storage/solutions/backup-and-archive), checked 2026-10-10.
 - **Exchange rate/payment route:** Searches did not yield an unambiguous authoritative same-day USD/NLe rate suitable for a binding calculation, nor the fee schedule for the card/payment route that would actually be used. Retain NLe 22.9194/USD only as a provisional planning assumption; obtain a dated bank/payment-provider quote before approval.
 
 ### Optional recovery cost
@@ -136,6 +137,9 @@ TNY-002 must not be marked complete if any of the following remains unresolved:
 - [Cloudflare Pages limits](https://developers.cloudflare.com/pages/platform/limits/) — static-site hosting limits and custom-domain support, checked 2026-10-10.
 - [Supabase custom SMTP](https://supabase.com/docs/guides/auth/auth-smtp) — default SMTP is not production-ready; custom SMTP required for normal external authentication email, checked 2026-10-10.
 - [Resend transactional email pricing](https://resend.com/pricing?product=transactional) — free-tier limits, checked 2026-10-10.
+- [Cloudflare Registrar domain prices](https://pricing.registrar.cloudflare.com/) — current listed extension registration and renewal prices, including `.com` at USD 10.46/year, checked 2026-10-10.
+- [Cloudflare Registrar renewal policy](https://developers.cloudflare.com/registrar/account-options/renew-domains/) — renewal at registry list price, checked 2026-10-10.
+- [Backblaze B2 pricing](https://www.backblaze.com/cloud-storage/solutions/backup-and-archive) — first 10 GB free, USD 6/TB/month, and egress allowance, checked 2026-10-10.
 - [ICANN domain-renewal guidance](https://www.icann.org/resources/pages/domain-name-renewal-expiration-faqs-2018-12-07-en/) — registrar-specific renewal prices, checked 2026-10-10.
 
 ## 7. Current conclusion
