@@ -68,6 +68,20 @@ Current Supabase documentation lists seven-day PITR at approximately USD 100/mon
 | Pro baseline | USD 25/month before additional services and overages | Preferred production candidate for further assessment, but over the current ceiling |
 | Pro plus 7-day PITR | Approximately USD 130/month before other services, assuming USD 10 compute credit offsets Small compute | Not approved; roughly NLe 2,980/month at the provisional planning rate; only evaluate if recovery objectives justify the added cost |
 
+### Recovery objectives — proposed for decision, not yet approved
+
+For the limited pilot, adopt these as **proposed minimum targets** for owner approval before production:
+
+- **RPO (maximum tolerable data loss): 24 hours** for the PostgreSQL database, conditional on daily backup completion. This is a target, not a guarantee; backup schedules and actual restore points must be verified.
+- **RTO (target to restore core service): 1 business day** after a declared recoverable outage, subject to staff availability, provider access, restore duration, and validation. This is not an SLA.
+- **Backup retention:** at least the Supabase Pro baseline of seven days for database backups, plus an independent export on a regular schedule stored separately. Proposed independent-export retention: 30 days, pending storage/privacy review.
+- **Restore test:** before launch, restore into a separate non-production project/environment; verify schema/migrations, row counts and representative calculations, RLS/authorization behavior, authentication flows, and object-storage recovery. Record duration, errors, and operator steps. Repeat at least quarterly and after material schema/backup changes.
+- **Object storage:** database backups do not establish that uploaded files can be restored. Define a separate inventory/checksum/export and restore test for Storage objects, including object-to-record consistency.
+- **Recovery ownership:** assign a named responsible role, a documented runbook, secure access to backup credentials, and an escalation/contact path before launch.
+- **Incident handling:** document how to declare recovery, preserve evidence, notify the project lead, validate recovered data, and communicate service restoration.
+
+If the project requires an RPO materially below 24 hours or an RTO below one business day, daily backups alone may not meet the requirement; evaluate PITR or another recovery design and its full cost. Do not enable paid PITR without a separate decision. These targets remain proposed until explicitly approved and demonstrated by a restore drill.
+
 ## 3. Security baseline
 
 ### Identity and privileged access
@@ -95,12 +109,12 @@ Current Supabase documentation lists seven-day PITR at approximately USD 100/mon
 - Never log passwords, tokens, MFA codes, or recovery codes.
 
 ### Backup and recovery
+- Proposed pilot RPO: 24 hours; proposed pilot RTO: one business day. Neither is approved or verified yet.
 - Baseline: daily backups with seven-day retention, subject to current plan verification.
-- Define approved recovery-point and recovery-time objectives before production.
-- Test restoration and record results.
-- Evaluate independent database exports/backups within the cost model.
+- Proposed independent export retention: 30 days, pending privacy and storage review; cost and automation remain unverified.
+- Complete and record a restore drill before production, including data, calculations, authorization, and uploaded-object recovery. Repeat quarterly and after material changes.
 - Treat database backups and Storage object recovery separately; do not assume restoring the database restores deleted uploaded objects.
-- If the required recovery objectives cannot be met with the baseline, document the cost and obtain a decision rather than silently lowering the requirements.
+- If required objectives cannot be met, document alternatives and costs and obtain a decision rather than silently lowering requirements.
 
 ## 4. Failure conditions
 
@@ -131,6 +145,7 @@ TNY-002 must not be marked complete if any of the following remains unresolved:
 - [Supabase billing FAQ](https://supabase.com/docs/guides/platform/billing-faq) — compute credit and multi-project billing examples.
 - [Supabase compute and disk](https://supabase.com/docs/guides/platform/compute-and-disk) — Micro and Small compute prices.
 - [Supabase database backups](https://supabase.com/docs/guides/platform/backups) — daily backup retention, PITR prices and Small compute requirement.
+- [Supabase manage PITR usage](https://supabase.com/docs/guides/platform/manage-your-usage/point-in-time-recovery) — official billing example totals approximately USD 130/month for Pro + Small compute + seven-day PITR after the compute credit.
 - [Supabase Auth MFA](https://supabase.com/docs/guides/auth/auth-mfa) — MFA implementation and enforcement.
 - [Supabase production checklist](https://supabase.com/docs/guides/deployment/going-into-prod) — production hardening.
 - [Bank of Sierra Leone](https://bsl.gov.sl/) — official starting point for exchange-rate verification; no unambiguous same-day USD/NLe rate or actual payment-route fee has been recorded.
@@ -142,6 +157,32 @@ TNY-002 must not be marked complete if any of the following remains unresolved:
 - [Backblaze B2 pricing](https://www.backblaze.com/cloud-storage/solutions/backup-and-archive) — first 10 GB free, USD 6/TB/month, and egress allowance, checked 2026-10-10.
 - [ICANN domain-renewal guidance](https://www.icann.org/resources/pages/domain-name-renewal-expiration-faqs-2018-12-07-en/) — registrar-specific renewal prices, checked 2026-10-10.
 
-## 7. Current conclusion
+## 7. Decision brief
+
+**Recommendation:** Do not select or provision Supabase for production yet. Keep Supabase Pro as the preferred candidate for evaluation, preserve the NLe 500/month ceiling, and seek explicit approval for any budget change only after the recovery targets and payment costs are validated.
+
+### Budget arithmetic (planning only)
+
+- Supabase Pro: USD 25/month.
+- Representative `.com` renewal annualized: USD 10.46/year ÷ 12 ≈ USD 0.87/month.
+- Known recurring subtotal before payment fees, independent backup operations, and usage overages: approximately USD 25.87/month.
+- At the provisional—not authoritative—rate of NLe 22.9194/USD, this is approximately NLe 592.90/month, already about NLe 92.90 over the ceiling.
+- Pro plus seven-day PITR is officially illustrated by Supabase at about USD 130/month including Small compute and compute credit; adding the annualized representative domain gives about USD 130.87/month, or approximately NLe 2,999/month at the same provisional rate, before other costs.
+- Independent storage may have a zero storage charge at very small volumes, but export automation, staff operations, restore drills, object backups, and payment fees are not costed. A free storage allowance is not a complete backup solution.
+
+### Decision paths
+1. **Stay within ceiling:** assess alternative hosting/database architecture or a controlled non-production pilot, but do not claim production readiness until email, backup/restore, security, and service reliability are met. Supabase Free is not the production recommendation.
+2. **Retain the proposed managed production baseline:** submit a separate budget request for a verified all-in monthly amount, with a contingency and recovery choice. PITR is a materially higher-cost option.
+3. **Recovery target decision:** approve or revise the proposed RPO 24 hours / RTO one business day / seven-day managed backup / 30-day independent export, then validate through a restore drill before production.
+
+### Explicit outstanding decisions/evidence
+- Approve or revise the proposed RPO/RTO and independent-export retention.
+- Obtain a dated exchange rate tied to the actual payment route and its fees. The Bank of Sierra Leone page exposes exchange-rate information, but the captured page did not unambiguously label a usable same-day USD/NLe quote; no rate is asserted as authoritative.
+- Confirm a domain choice and renewal quote; `.com` is representative only.
+- Confirm expected user, data, file-storage, egress, and email volumes.
+- Select and test database and object-storage backup/export/restore procedures.
+- Recalculate the all-in budget using verified quotes and a reasonable contingency before any provider/budget decision.
+
+## 8. Current conclusion
 
 Supabase remains the priority candidate, but the Pro baseline fails the current budget ceiling on the available estimate. No budget increase, provider selection, provisioning, deployment, or application implementation is authorized by this assessment. Continue only with evidence gathering and documentation until the user makes the required separate decisions.
