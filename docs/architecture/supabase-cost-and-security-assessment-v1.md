@@ -1,7 +1,7 @@
 # Supabase cost and security assessment — TNY-002
 
 - **Status:** Preliminary assessment; not a final provider selection
-- **Assessment date:** 2026-10-10 (official Supabase pricing pages re-checked during follow-up)
+- **Assessment date:** 2026-10-10 (Supabase, Cloudflare Pages, Resend, and domain-renewal evidence re-checked during follow-up)
 - **Related ticket:** [TNY-002 — Architecture and technical baseline](../tickets/TNY-002.md)
 - **Related ADR:** [ADR-0001 — Modular monolith and provider evaluation](../adr/0001-modular-monolith-and-provider-evaluation.md)
 - **Budget rule:** NLe 500/month remains the current ceiling. No increase is approved by this assessment.
@@ -25,7 +25,7 @@ Using the existing provisional planning rate of NLe 22.9194/USD gives USD 25 ≈
 - Initial pilot workload; no reliable traffic, database growth, storage, or egress forecast is available yet.
 - No paid point-in-time recovery (PITR) in the baseline.
 - No second paid environment assumed.
-- Domain, email delivery, frontend hosting, payment fees, independent backups, and usage overages are not yet priced.
+- Frontend hosting has a possible USD 0 static-site option; email has a possible USD 0 starter option but is still a required service to validate; domain renewal, payment fees, independent backups, and usage overages remain unpriced.
 
 ### Recurring cost lines
 
@@ -36,17 +36,24 @@ Using the existing provisional planning rate of NLe 22.9194/USD gives USD 25 ≈
 | Net additional default Micro compute | 0.00 | 0.00 | Conditional on credit applying to selected instance |
 | Daily database backups, seven-day retention | Included | Included | Pro plan feature; restore test still required |
 | TOTP MFA APIs | No separate base charge identified | 0.00 assumed incremental | App flows and enforcement remain engineering work |
-| Frontend hosting | TBD | TBD | Hosting provider not selected |
+| Frontend hosting | 0.00 candidate | 0.00 candidate | Cloudflare Pages Free supports static assets and custom domains; not a quote for Functions or other services |
 | Domain and DNS | TBD | TBD | Registrar and renewal terms not selected |
-| Transactional email | TBD | TBD | Provider, volume, and deliverability requirements unknown |
+| Transactional email | 0.00 candidate | 0.00 candidate | Resend Free advertises 3,000 emails/month and 100/day; must confirm suitability, sender-domain setup, and actual authentication volume |
 | Independent database export/backup storage | TBD | TBD | Strategy and retention not selected |
 | Payment processing/currency conversion | TBD | TBD | Payment route and actual exchange rate unknown |
 | Additional database compute/disk, storage, or egress | TBD | TBD | Usage forecast and plan limits must be verified |
 | Monitoring or other paid operational services | TBD | TBD | Select only when required and costed |
 
-**Known baseline subscription charge:** USD 25/month, estimated at NLe 572.99/month using the provisional planning rate. This already exceeds the NLe 500 ceiling by approximately NLe 72.99. The budget cannot be marked as passing.
+**Known baseline subscription charge:** USD 25/month, estimated at NLe 572.99/month using the provisional planning rate. This already exceeds the NLe 500 ceiling by approximately NLe 72.99. The budget cannot be marked as passing. Even if static hosting and starter email remain free, domain renewal, payment conversion, independent backup/export, and potential overages are still unresolved.
 
 The USD 10 compute credit must not be counted twice: under the stated assumption, the default Micro compute charge is offset by that credit. Confirm the exact current billing mechanics before relying on this estimate.
+
+### Hosting, email, domain, and currency evidence
+
+- **Static frontend:** Cloudflare Pages documents a Free plan with up to 500 builds/month, custom-domain support, and free/unlimited static asset requests. This is a candidate for a static React/Vite frontend, not a commitment to use Cloudflare and not a price for server-side Functions. Source: [Cloudflare Pages limits](https://developers.cloudflare.com/pages/platform/limits/), checked 2026-10-10.
+- **Authentication email:** Supabase states its built-in SMTP is not for production: it is limited to pre-authorized team addresses and currently 2 messages/hour, with no delivery SLA. Production email/password confirmation and password-reset flows require custom SMTP. Resend lists a Free tier of 3,000 emails/month and 100/day, so USD 0 is a candidate for a small pilot only if sender-domain verification, delivery needs, and limits are acceptable. Sources: [Supabase custom SMTP](https://supabase.com/docs/guides/auth/auth-smtp), [Supabase production checklist](https://supabase.com/docs/guides/deployment/going-into-prod), [Resend pricing](https://resend.com/pricing?product=transactional), checked 2026-10-10.
+- **Domain and DNS:** Cloudflare DNS can be a no-cost DNS candidate, but the domain registration/renewal price depends on registrar and TLD. ICANN advises checking renewal terms separately from promotional registration prices. No selected domain or registrar quote is recorded; monthly cost remains TBD. Sources: [Cloudflare plans](https://www.cloudflare.com/plans/), [ICANN renewal guidance](https://www.icann.org/resources/pages/domain-name-renewal-expiration-faqs-2018-12-07-en/), checked 2026-10-10.
+- **Exchange rate/payment route:** Searches did not yield an unambiguous authoritative same-day USD/NLe rate suitable for a binding calculation, nor the fee schedule for the card/payment route that would actually be used. Retain NLe 22.9194/USD only as a provisional planning assumption; obtain a dated bank/payment-provider quote before approval.
 
 ### Optional recovery cost
 
@@ -125,7 +132,11 @@ TNY-002 must not be marked complete if any of the following remains unresolved:
 - [Supabase database backups](https://supabase.com/docs/guides/platform/backups) — daily backup retention, PITR prices and Small compute requirement.
 - [Supabase Auth MFA](https://supabase.com/docs/guides/auth/auth-mfa) — MFA implementation and enforcement.
 - [Supabase production checklist](https://supabase.com/docs/guides/deployment/going-into-prod) — production hardening.
-- [Bank of Sierra Leone](https://bsl.gov.sl/) — official exchange-rate portal; an unambiguous same-day USD/NLe rate and payment-route fee remain to be recorded before a binding local-currency budget.
+- [Bank of Sierra Leone](https://bsl.gov.sl/) — official starting point for exchange-rate verification; no unambiguous same-day USD/NLe rate or actual payment-route fee has been recorded.
+- [Cloudflare Pages limits](https://developers.cloudflare.com/pages/platform/limits/) — static-site hosting limits and custom-domain support, checked 2026-10-10.
+- [Supabase custom SMTP](https://supabase.com/docs/guides/auth/auth-smtp) — default SMTP is not production-ready; custom SMTP required for normal external authentication email, checked 2026-10-10.
+- [Resend transactional email pricing](https://resend.com/pricing?product=transactional) — free-tier limits, checked 2026-10-10.
+- [ICANN domain-renewal guidance](https://www.icann.org/resources/pages/domain-name-renewal-expiration-faqs-2018-12-07-en/) — registrar-specific renewal prices, checked 2026-10-10.
 
 ## 7. Current conclusion
 
