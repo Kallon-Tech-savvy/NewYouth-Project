@@ -44,10 +44,18 @@ Apply `db/migrations/0001_domain_schema.sql` to a new disposable PostgreSQL data
 
 ## Verification
 
-Run the migration on an empty disposable PostgreSQL database, then run:
+Requirements: Docker Engine and Docker Compose v2. From the repository root, run:
+
+```sh
+sh scripts/test-domain-schema.sh
+```
+
+The script starts an isolated PostgreSQL 16 container, applies the migration, runs the SQL invariant checks, and removes the test containers and volumes on exit. The test script uses a transaction and rolls back its fixtures. It checks seeded categories and pilot cities, positive-price constraints, foreign-key enforcement, approval-before-publication, publication status protection, and estimate source lineage.
+
+For manual execution, apply `db/migrations/0001_domain_schema.sql` to an empty disposable PostgreSQL 13+ database, then run:
 
 ```sh
 psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f db/tests/0001_domain_schema_invariants.sql
 ```
 
-The test script uses a transaction and rolls back its fixtures. It checks seeded categories, positive-price constraints, foreign-key enforcement, approval-before-publication, publication status protection, and estimate source lineage. A successful execution is not yet recorded; no database server/runtime was available in this repository inspection.
+The Docker-based setup is committed but has not been executed in this environment. Do not treat the presence of the test runner as a passing test result.
