@@ -1,0 +1,45 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: newyouth_schema_test
+      POSTGRES_USER: schema_test
+      POSTGRES_PASSWORD: schema_test_only
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U schema_test -d newyouth_schema_test"]
+      interval: 2s
+      timeout: 3s
+      retries: 20
+    tmpfs:
+      - /var/lib/postgresql/data
+    networks:
+      - schema-test
+
+  schema-test:
+    image: postgres:16-alpine
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      PGHOST: db
+      PGPORT: "5432"
+      PGDATABASE: newyouth_schema_test
+      PGUSER: schema_test
+      PGPASSWORD: schema_test_only
+    volumes:
+      - ./db/migrations/0001_domain_schema.sql:/workspace/0001_domain_schema.sql:ro
+      - ./db/tests/0001_domain_schema_invariants.sql:/workspace/0001_domain_schema_invariants.sql:ro
+    entrypoint: ["/bin/sh", "-ec"]
+    command:
+      - |
+        echo "Applying domain schema migration..."
+        psql -v ON_ERROR_STOP=1 -f /workspace/0001_domain_schema.sql
+        echo "Running schema invariant checks..."
+        psql -v ON_ERROR_STOP=1 -f /workspace/0001_domain_schema_invariants.sql
+        echo "Domain schema migration and invariant checks passed."
+    networks:
+      - schema-test
+
+networks:
+  schema-test:
+    driver: bridge
